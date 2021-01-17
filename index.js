@@ -3,34 +3,32 @@ $(document).ready(function(){
 })
 
 const ID_REGEX = /#[\d\w]+/g;
+const SUP_OPERATION = ['<', '>' ,'='];
 
 function expressionRegister(exp){
-    var leftExp = exp.substring(0, exp.indexOf('='));
-    var rightExp = exp.substring(exp.indexOf('=')+1, exp.length);
 
-    var outIDs = rightExp.match(ID_REGEX);
-    if(outIDs.length < 1){
-        throw " Invalid number of ID on the right of = symbol"
+    if(exp.indexOf('=') != -1){
+        var leftExp = exp.substring(0, exp.indexOf('='));
+        var rightExp = exp.substring(exp.indexOf('=')+1, exp.length);
+        var outIDs = rightExp.match(ID_REGEX);
+        var inIDs = leftExp.match(ID_REGEX);
+        var $outs = $(outIDs.join(','));
+        var $ins = $(inIDs.join(','));
+    
+        //add event listener to detect the changes on the fields
+        $ins.on('change', function(){
+            var mathExp = replaceIdsWithValue(leftExp, $ins);
+            var out = expTreeEval(jsep(mathExp));
+            $outs.val(out);
+        })
+
+    }else if(exp.indexOf('<') != -1 || exp.indexOf('>') != -1){
+
     }
-    var $outs = $(outIDs.join(','));
 
-    //extract the fields 
-    var inIDs = leftExp.match(ID_REGEX);
-    var $ins = $(inIDs.join(','));
-
-    //if in fields is less than 1
-    if($ins.length < 1){
-        throw "Invalid IDs on the left of = symbol"
-    }
-
-
-    //add event listener to detect the changes on the fields
-    $ins.on('change', function(){
-        var out = 0;
-
-        $outs.val(out);
-    })
 }
+
+
 
 function expTreeEval(root){
     if(!root){
@@ -57,16 +55,18 @@ function expTreeEval(root){
 
 //it replaces ID selectors in the expression with matched values in $ins
 function replaceIdsWithValue(exp, $ins){
+    var newExp = exp;
     $ins.each(function(i){
         var id = $(this).prop('id');
         var value = $(this).val();
         if(id){
             //convert all invalid value into 0
             if(!value){
-
+                value = '0';
             }
-            exp.replace(id, )
+            newExp.replace(id, value);
         }
     })
 
+    return newExp; 
 }
